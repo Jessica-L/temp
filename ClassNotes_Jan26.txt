@@ -1,0 +1,65 @@
+Bakery Algorithm
+- FCFS scheduling
+- How? All take a number.  Wait until lower numbers have been served.
+- Lexicograhic order (a,i) > (b, j) if a > b, or a = b and i > j
+- Implementation: 
+   - give each process a thread ID
+   - order is done through pairing
+- see algorithm's outline of implmentation on SLIDE 4 and SLIDE 6
+- the code for lock():
+
+	public void lock()
+        {
+	   flag[i] = true;
+	   label[i] = max(label[0], ..., label(n-1)) + 1
+	   while 
+- why does bakery algorithm give mutual exclusion and deadlock-freedom( no matter 
+  what is done, at least one moves through to critica section)?
+    - deadlock-free becuase of the first come first serve property and and the use
+      of lexicographical order; whichever thread expresses interest first should be
+      (and is) allowed to go through first. [SEE FCFS SLIDE 15]
+    - if you have only one thread, you won't get stuck (getting stuck only would only
+      occur if another flag is raised which won't happen if only one thread.
+    - just make your flag and label integers volatile to ensure they are atomic integers
+    - ties are impossible since all have unique thread IDs
+
+Bakery Y2^32K Bug: Mutex breaks if label[i] overflows. (SEE SLIDE 21)
+
+Timestamp (SLIDE 22)
+
+Bakery Algorithm requires that you have to read N distinct variables and therefore it is
+NOT practical.
+
+Question: Can you have less than N variables using Baker?  No should be the answer.  You
+need more support from the hardware but this is limited to read and write atomically and
+in these cases you still need N variables.  Fundamental property: No algorithm is less
+than nlogn runtime and have less than n variables.
+
+Note: If you are atomically incrementing, however, you can do better.  Either read or write
+atomically would never allow to use less than N variables.
+
+Shared read/write memory locations called REGISTERS. (SLIDE 24) --> applies to caches, memory, etc. not just registers.
+
+For the single writer case (i.e. flag variable):
+at least N MRSW (multi-reader/single writer) registers are needed to solve deadlock free
+mutual exclusion.
+N registers like Flag[]...
+Proof (Need N MRSW  Registers):
+	Each thread A B C must write to some register (only two registers available)
+        Here we know if we have 3 threads at least one will not be able to write.
+
+For MRMW i.e. victim[]: look at proof for two threads (~ SLIDE: 30)
+
+If you have A and B, let's say B has called lock() and is progressing.  Be will need to write to the register before
+entering th CS.  Let's say A is not even interested, so B proceeds into CS. At some point, he writes to register for last time
+and goes into CS.
+
+COVERING STATE is when you stop B just before it executes its last write to the register.
+Suppose in this instance A goes into CS (possibly writes to register).  Scheduler then wakes up B
+who finishes his last write and does not know where A is anymore.  Therefore, we can have both
+A and B in CS!!! :-(
+
+
+
+
+
